@@ -40,6 +40,9 @@ app.use("/api/events", eventsRoutes);
 const queuesRoutes = require("./routes/queues.routes");
 app.use("/api/queues", queuesRoutes);
 
+const complaintsRoutes = require("./routes/complaints.routes");
+app.use("/api/complaints", complaintsRoutes);
+
 // =================================
 // FRONTEND
 // =================================
