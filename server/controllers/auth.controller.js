@@ -1,83 +1,53 @@
-const db = require("../config/database");
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken"); // New import for sessions
+const jwt = require("jsonwebtoken");
+const db = require("../config/database");
 
-const signup = async (req, res) => {
+// 1. REGISTER FUNCTION
+const register = (req, res) => {
     const { name, email, password } = req.body;
 
     if (!name || !email || !password) {
         return res.status(400).json({ success: false, message: "All fields are required." });
     }
 
-    try {
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
-
-        const sql = `INSERT INTO users (name, email, password) VALUES (?, ?, ?)`;
-        
-        db.run(sql, [name, email, hashedPassword], function(err) {
-            if (err) {
-                if (err.message.includes("UNIQUE constraint failed")) {
-                    return res.status(400).json({ success: false, message: "Email already exists." });
-                }
-                return res.status(500).json({ success: false, message: "Database error." });
-            }
-            
-            res.status(201).json({ 
-                success: true, 
-                message: "Account created successfully!",
-                userId: this.lastID 
-            });
-        });
-    } catch (error) {
-        res.status(500).json({ success: false, message: "Server error." });
-    }
+    const hashedPassword = bcrypt.hashSync(password, 10);
+    const sql = `INSERT INTO users (name, email, password) VALUES (?, ?, ?)`;
+    
+    db.run(sql, [name, email, hashedPassword], function(err) {
+        if (err) {
+            return res.status(500).json({ success: false, message: "Email already registered or database error." });
+        }
+        res.status(201).json({ success: true, message: "Registration successful!" });
+    });
 };
 
-const login = async (req, res) => {
+// 2. LOGIN FUNCTION (With the new Admin Role fix!)
+const login = (req, res) => {
     const { email, password } = req.body;
 
-    // 1. Check if fields are provided
-    if (!email || !password) {
-        return res.status(400).json({ success: false, message: "Email and password are required." });
-    }
+    const sql = `SELECT * FROM users WHERE email = ?`;
+    db.get(sql, [email], (err, user) => {
+        if (err) return res.status(500).json({ success: false, message: "Database error." });
+        if (!user) return res.status(401).json({ success: false, message: "Invalid credentials." });
 
-    try {
-        // 2. Find the user in the database
-        const sql = `SELECT * FROM users WHERE email = ?`;
-        db.get(sql, [email], async (err, user) => {
-            if (err) return res.status(500).json({ success: false, message: "Database error." });
-            
-            // If no user is found
-            if (!user) {
-                return res.status(401).json({ success: false, message: "Invalid email or password." });
-            }
+        const passwordIsValid = bcrypt.compareSync(password, user.password);
+        if (!passwordIsValid) return res.status(401).json({ success: false, message: "Invalid credentials." });
 
-            // 3. Compare the typed password with the hashed database password
-            const isMatch = await bcrypt.compare(password, user.password);
-            if (!isMatch) {
-                return res.status(401).json({ success: false, message: "Invalid email or password." });
-            }
+        // Include the role in the token
+        const token = jwt.sign(
+            { id: user.id, role: user.role }, 
+            process.env.JWT_SECRET || "super_secret_key", 
+            { expiresIn: 86400 } // 24 hours
+        );
 
-            // 4. Generate a JWT Token (This is their digital ID card)
-            const token = jwt.sign(
-                { id: user.id, role: user.role }, 
-                process.env.JWT_SECRET || "campusx_secret_key_123", // Fallback if no .env
-                { expiresIn: "1d" } // Token expires in 1 day
-            );
-
-            // 5. Send success response with token
-            res.json({
-                success: true,
-                message: "Logged in successfully!",
-                token: token,
-                user: { id: user.id, name: user.name, email: user.email, role: user.role }
-            });
+        res.status(200).json({
+            success: true,
+            message: "Login successful!",
+            token: token,
+            role: user.role // Send role to frontend
         });
-    } catch (error) {
-        res.status(500).json({ success: false, message: "Server error." });
-    }
+    });
 };
 
-// Export both functions
-module.exports = { signup, login };
+// 3. EXPORT BOTH
+module.exports = { register, login };

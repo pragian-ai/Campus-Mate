@@ -1,22 +1,27 @@
 document.addEventListener("DOMContentLoaded", () => {
     const token = localStorage.getItem("campusx_token");
+    const role = localStorage.getItem("campusx_role");
     
-    // Protect the page
     if (!token) {
         window.location.href = "/pages/login.html";
         return;
     }
 
-    const reportForm = document.getElementById("reportForm");
+    const adminPanel = document.getElementById("adminPanel");
+    const itemForm = document.getElementById("itemForm");
     const itemsFeed = document.getElementById("itemsFeed");
 
-    // =================================
-    // FETCH & RENDER ITEMS
-    // =================================
+    // 1. CONDITIONAL UI: Show form ONLY if user is admin
+    if (role === "admin") {
+        adminPanel.style.display = "block";
+    }
+
+    // 2. FETCH ITEMS
     const fetchItems = async () => {
         try {
+            // Note: Update this URL if your route is named differently (e.g. /api/items)
             const res = await fetch("/api/lost-found", {
-                headers: { "Authorization": `Bearer ${token}` } // Attaching the wristband!
+                headers: { "Authorization": `Bearer ${token}` }
             });
             const data = await res.json();
             
@@ -28,62 +33,67 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
+    // 3. RENDER BEAUTIFUL CARDS
     const renderItems = (items) => {
         if (items.length === 0) {
-            itemsFeed.innerHTML = "<p>No items reported yet.</p>";
+            itemsFeed.innerHTML = `
+                <div style="grid-column: 1 / -1; background: white; padding: 40px; text-align: center; border-radius: 12px; color: #6b7280;">
+                    No lost or found items reported right now.
+                </div>`;
             return;
         }
 
-        itemsFeed.innerHTML = items.map(item => `
-            <div style="background: white; padding: 15px; border-radius: 8px; border: 1px solid #ddd;">
-                <span style="background: ${item.type === 'lost' ? '#fee2e2' : '#dcfce7'}; color: ${item.type === 'lost' ? '#991b1b' : '#166534'}; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; text-transform: uppercase;">
-                    ${item.type}
-                </span>
-                <h4 style="margin: 10px 0 5px 0;">${item.title}</h4>
-                <p style="margin: 0 0 10px 0; font-size: 14px; color: #555;">📍 ${item.location}</p>
-                <p style="margin: 0; font-size: 14px;">${item.description || 'No description provided.'}</p>
+        itemsFeed.innerHTML = items.map(item => {
+            // Dynamic badge color based on status
+            const badgeClass = item.status.toLowerCase() === "lost" ? "lost" : "found";
+            
+            return `
+            <div class="item-card">
+                <span class="badge ${badgeClass}">${item.status}</span>
+                <h4 class="item-title">${item.name}</h4>
+                <div class="item-meta">
+                    <span>📍 <strong>Location:</strong> ${item.location}</span>
+                    <span>📞 <strong>Contact:</strong> ${item.contact}</span>
+                </div>
+                <p style="margin: 0; font-size: 14px; color: #4b5563; line-height: 1.5;">${item.description || 'No description provided.'}</p>
             </div>
-        `).join('');
+        `}).join('');
     };
 
-    // =================================
-    // SUBMIT NEW REPORT
-    // =================================
-    if (reportForm) {
-        reportForm.addEventListener("submit", async (e) => {
+    // 4. SUBMIT ITEM (Admins Only)
+    if (itemForm) {
+        itemForm.addEventListener("submit", async (e) => {
             e.preventDefault();
             
-            const type = document.getElementById("type").value;
-            const title = document.getElementById("title").value;
-            const location = document.getElementById("location").value;
-            const category = document.getElementById("category").value;
-            const description = document.getElementById("description").value;
+            const name = document.getElementById("itemName").value;
+            const status = document.getElementById("itemStatus").value;
+            const location = document.getElementById("itemLocation").value;
+            const contact = document.getElementById("contactInfo").value;
+            const description = document.getElementById("itemDescription").value;
 
             try {
                 const res = await fetch("/api/lost-found", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
-                        "Authorization": `Bearer ${token}` // Attaching the wristband!
+                        "Authorization": `Bearer ${token}`
                     },
-                    body: JSON.stringify({ type, title, location, category, description })
+                    body: JSON.stringify({ name, status, location, contact, description })
                 });
                 
                 const data = await res.json();
                 
                 if (data.success) {
-                    alert("Report submitted successfully!");
-                    reportForm.reset(); // Clear the form
-                    fetchItems(); // Refresh the list immediately
+                    itemForm.reset();
+                    fetchItems(); // Refresh feed instantly
                 } else {
                     alert("Error: " + data.message);
                 }
             } catch (error) {
-                console.error("Error submitting report:", error);
+                console.error("Error posting item:", error);
             }
         });
     }
 
-    // Run the fetch function as soon as the page loads
     fetchItems();
 });

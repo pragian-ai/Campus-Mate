@@ -1,10 +1,9 @@
 const express = require("express");
 const router = express.Router();
+const { getQueues } = require("../controllers/queues.controller");
 const verifyToken = require("../middleware/auth");
-const { getQueues, updateQueue, createQueue } = require("../controllers/queues.controller");
 
+// Anyone logged in can view the queues
 router.get("/", verifyToken, getQueues);
-router.put("/", verifyToken, updateQueue);
-router.post("/", verifyToken, createQueue);
 
 module.exports = router;

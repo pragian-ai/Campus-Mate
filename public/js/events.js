@@ -1,18 +1,22 @@
 document.addEventListener("DOMContentLoaded", () => {
     const token = localStorage.getItem("campusx_token");
+    const role = localStorage.getItem("campusx_role"); // Fetch the role!
     
-    // Protect the page
     if (!token) {
         window.location.href = "/pages/login.html";
         return;
     }
 
+    const adminPanel = document.getElementById("adminPanel");
     const eventForm = document.getElementById("eventForm");
     const eventsFeed = document.getElementById("eventsFeed");
 
-    // =================================
-    // FETCH & RENDER EVENTS
-    // =================================
+    // 1. CONDITIONAL UI: Show form ONLY if user is admin
+    if (role === "admin") {
+        adminPanel.style.display = "block";
+    }
+
+    // 2. FETCH EVENTS
     const fetchEvents = async () => {
         try {
             const res = await fetch("/api/events", {
@@ -28,28 +32,27 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
+    // 3. RENDER BEAUTIFUL CARDS
     const renderEvents = (events) => {
         if (events.length === 0) {
-            eventsFeed.innerHTML = "<p>No upcoming events.</p>";
+            eventsFeed.innerHTML = "<p>No upcoming events at the moment.</p>";
             return;
         }
 
         eventsFeed.innerHTML = events.map(event => `
-            <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #ddd; border-left: 4px solid #151619;">
-                <h4 style="margin: 0 0 5px 0; font-size: 18px;">${event.title}</h4>
-                <div style="display: flex; gap: 15px; margin-bottom: 10px; font-size: 13px; color: #555;">
-                    <span>📅 ${event.date}</span>
+            <div class="event-card">
+                <div class="event-date">${new Date(event.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</div>
+                <h4 class="event-title">${event.title}</h4>
+                <div class="event-meta">
                     <span>⏰ ${event.time}</span>
                     <span>📍 ${event.location}</span>
                 </div>
-                <p style="margin: 0; font-size: 14px;">${event.description || 'No description provided.'}</p>
+                <p style="margin: 0; font-size: 14px; color: #4b5563; line-height: 1.5;">${event.description}</p>
             </div>
         `).join('');
     };
 
-    // =================================
-    // SUBMIT NEW EVENT
-    // =================================
+    // 4. SUBMIT EVENT (Admins Only)
     if (eventForm) {
         eventForm.addEventListener("submit", async (e) => {
             e.preventDefault();
@@ -73,9 +76,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 const data = await res.json();
                 
                 if (data.success) {
-                    alert("Event posted successfully!");
                     eventForm.reset();
-                    fetchEvents();
+                    fetchEvents(); // Refresh feed
                 } else {
                     alert("Error: " + data.message);
                 }
@@ -85,19 +87,5 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Load events initially
     fetchEvents();
 });
-
-//  Logout Logic
-const logoutBtn = document.getElementById("logoutBtn");
-    if (logoutBtn) {
-        logoutBtn.addEventListener("click", () => {
-            // Destroy the wristband and user data
-            localStorage.removeItem("campusx_token");
-            localStorage.removeItem("campusx_user");
-            
-            // Send back to login
-            window.location.href = "/pages/login.html";
-        });
-};

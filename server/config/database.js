@@ -1,94 +1,106 @@
 const sqlite3 = require('sqlite3').verbose();
+const bcrypt = require('bcrypt');
 const path = require('path');
-const fs = require('fs'); // Import the File System module
 
-// 1. Define the directory and file paths
-const dbDir = path.resolve(__dirname, '../../database');
-const dbPath = path.join(dbDir, 'campusx.db');
-
-// 2. Create the directory if it doesn't exist
-if (!fs.existsSync(dbDir)) {
-    fs.mkdirSync(dbDir, { recursive: true });
-}
-
-// 3. Connect to SQLite database
+// Connect to the SQLite database
+const dbPath = path.resolve(__dirname, '../../campusx.db');
 const db = new sqlite3.Database(dbPath, (err) => {
     if (err) {
-        console.error('Error connecting to database:', err.message);
+        console.error("Error opening database:", err.message);
     } else {
-        console.log('Connected to the SQLite database.');
+        console.log("Connected to the SQLite database.");
     }
 });
 
-// Create Users Table
+// 1. Create Users Table
 db.run(`CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
-    role TEXT DEFAULT 'student',
+    role TEXT DEFAULT 'user',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 )`, (err) => {
     if (err) console.error("Error creating users table:", err);
+    else {
+        // Auto-create Admin for testing
+        const hash = bcrypt.hashSync("admin123", 10);
+        db.run(`INSERT OR IGNORE INTO users (name, email, password, role) VALUES ('Campus Admin', 'admin@campusx.com', ?, 'admin')`, [hash]);
+    }
 });
 
+// 2. Create Lost & Found Table
 db.run(`CREATE TABLE IF NOT EXISTS lost_found (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    type TEXT NOT NULL,         -- 'lost' or 'found'
-    title TEXT NOT NULL,
-    description TEXT,
-    category TEXT,
+    name TEXT NOT NULL,
+    status TEXT NOT NULL,
     location TEXT NOT NULL,
-    status TEXT DEFAULT 'active', -- 'active' or 'recovered'
-    user_id INTEGER,            -- Links the item to the user who reported it
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    contact TEXT NOT NULL,
+    description TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 )`, (err) => {
     if (err) console.error("Error creating lost_found table:", err);
 });
-// Create Events Table
+
+db.run(`CREATE TABLE IF NOT EXISTS claims (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    item_id INTEGER,
+    user_id INTEGER NOT NULL,
+    gr_number TEXT NOT NULL,
+    mobile TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+)`);
+
+// 3. Create Events Table
 db.run(`CREATE TABLE IF NOT EXISTS events (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL,
-    description TEXT,
     date TEXT NOT NULL,
     time TEXT NOT NULL,
     location TEXT NOT NULL,
-    created_by INTEGER,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (created_by) REFERENCES users(id)
+    description TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 )`, (err) => {
     if (err) console.error("Error creating events table:", err);
 });
 
-// Create Queues Table
+// 4. Create Queues Table (Smart Wait)
 db.run(`CREATE TABLE IF NOT EXISTS queues (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    facility_name TEXT NOT NULL,
+    facility_name TEXT UNIQUE NOT NULL,
     people_waiting INTEGER DEFAULT 0,
     estimated_wait_min INTEGER DEFAULT 0,
     status TEXT DEFAULT 'Normal',
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 )`, (err) => {
-    if (err) {
-        console.error("Error creating queues table:", err);
-    } else {
-        console.log("Queues table ready!");
+    if (!err) {
+        // Auto-insert dummy data for the demo!
+        db.run(`INSERT OR IGNORE INTO queues (facility_name, people_waiting, estimated_wait_min, status) VALUES ('Main Canteen', 24, 15, 'Busy')`);
+        db.run(`INSERT OR IGNORE INTO queues (facility_name, people_waiting, estimated_wait_min, status) VALUES ('Library Print Station', 2, 5, 'Normal')`);
+        db.run(`INSERT OR IGNORE INTO queues (facility_name, people_waiting, estimated_wait_min, status) VALUES ('IT Help Desk', 8, 20, 'Busy')`);
     }
 });
 
-// Create Complaints Table
 db.run(`CREATE TABLE IF NOT EXISTS complaints (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL,
-    description TEXT NOT NULL,
     category TEXT NOT NULL,
-    status TEXT DEFAULT 'Submitted', 
+    description TEXT NOT NULL,
+    status TEXT DEFAULT 'Open',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+)`);
+
+// 5. Create SOS Alerts Table
+db.run(`CREATE TABLE IF NOT EXISTS sos_alerts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER,
+    latitude REAL,
+    longitude REAL,
+    status TEXT DEFAULT 'Active',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id)
 )`, (err) => {
-    if (err) console.error("Error creating complaints table:", err);
+    if (err) console.error("Error creating sos_alerts table:", err);
 });
 
 module.exports = db;

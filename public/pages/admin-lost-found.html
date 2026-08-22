@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Lost & Found — Admin</title>
+    <style>
+        body { margin: 0; font-family: 'Inter', system-ui, sans-serif; background: #0f172a; display: flex; height: 100vh; color: #f8fafc; }
+        aside { width: 250px; background: #020617; padding: 24px; border-right: 1px solid #1e293b; display: flex; flex-direction: column; }
+        aside h2 { color: #ef4444; margin-top: 0; font-size: 24px; }
+        aside a { color: #94a3b8; text-decoration: none; padding: 12px 16px; display: block; border-radius: 8px; margin-bottom: 4px; transition: 0.2s;}
+        aside a:hover, aside a.active { background: #1e293b; color: white; font-weight: 600; border-left: 3px solid #ef4444; }
+        main { flex: 1; padding: 40px; overflow-y: auto; }
+        .form-card { background: #1e293b; padding: 24px; border-radius: 12px; border-top: 4px solid #8b5cf6; margin-bottom: 30px; }
+        .input-group { display: flex; gap: 15px; margin-bottom: 15px; }
+        input, select, textarea { flex: 1; padding: 12px; border: 1px solid #334155; border-radius: 8px; background: #0f172a; color: white; font-family: inherit; outline: none; }
+        input:focus, select:focus, textarea:focus { border-color: #8b5cf6; }
+        button { background: #8b5cf6; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        button:hover { background: #7c3aed; }
+        .claim-log-card { background: #1e293b; padding: 18px; border-radius: 10px; margin-bottom: 12px; border-left: 4px solid #3b82f6; }
+    </style>
+</head>
+<body>
+    <aside>
+        <h2>🛡️ Admin Panel</h2>
+        <nav style="margin-top: 30px; flex: 1;">
+            <a href="/pages/admin.html">📊 Overview & SOS</a>
+            <a href="/pages/admin-events.html">📅 Manage Events</a>
+            <a href="/pages/admin-lost-found.html" class="active">🔍 Lost & Found</a>
+            <a href="/pages/admin-complaints.html">⚠️ Complaints</a>
+        </nav>
+        <a href="/pages/login.html" onclick="localStorage.clear()" style="color: #ef4444; margin-top: auto;">Logout</a>
+    </aside>
+    <main>
+        <h1>Report Lost or Found Item</h1>
+        <div class="form-card">
+            <form id="lfForm">
+                <div class="input-group">
+                    <input type="text" id="iName" placeholder="Item Name (e.g., Blue Bag)" required autocomplete="off">
+                    <select id="iStatus" required>
+                        <option value="Lost">Lost (Looking for it)</option>
+                        <option value="Found">Found (We have it)</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="iLocation" placeholder="Location Found/Lost" required autocomplete="off">
+                    <input type="text" id="iContact" placeholder="Contact/Return Desk" required autocomplete="off">
+                </div>
+                <textarea id="iDesc" placeholder="Description of the item..." rows="3" style="width: 100%; box-sizing: border-box; margin-bottom: 15px;"></textarea>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div id="msg"></div>
+                    <button type="submit">Post Item</button>
+                </div>
+            </form>
+        </div>
+
+        <h2 style="margin-top: 40px; border-bottom: 1px solid #1e293b; padding-bottom: 10px;">Security Claims Log (Anti-Spoofing Feed)</h2>
+        <div id="claimsFeed"><p style="color: #64748b;">Loading logs...</p></div>
+    </main>
+
+    <script>
+        document.getElementById("lfForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const token = localStorage.getItem("campusx_token");
+            const msg = document.getElementById("msg");
+            
+            const payload = {
+                name: document.getElementById("iName").value,
+                status: document.getElementById("iStatus").value,
+                location: document.getElementById("iLocation").value,
+                contact: document.getElementById("iContact").value,
+                description: document.getElementById("iDesc").value
+            };
+
+            try {
+                const res = await fetch("/api/lost-found", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    msg.innerHTML = "✅ Item Reported!";
+                    msg.style.color = "#10b981";
+                    e.target.reset();
+                } else {
+                    msg.innerHTML = "❌ " + data.message;
+                    msg.style.color = "#ef4444";
+                }
+            } catch (err) {
+                msg.innerHTML = "❌ Connection error.";
+                msg.style.color = "#ef4444";
+            }
+        });
+
+        const loadClaimsLog = async () => {
+            const token = localStorage.getItem("campusx_token");
+            const feed = document.getElementById("claimsFeed");
+            
+            try {
+                const res = await fetch("/api/lost-found/admin/claims", { 
+                    headers: { "Authorization": `Bearer ${token}` } 
+                });
+                const data = await res.json();
+                
+                if (data.success && data.data.length > 0) {
+                    feed.innerHTML = data.data.map(c => `
+                        <div class="claim-log-card">
+                            <h4 style="margin: 0 0 5px 0; color: #f8fafc;">Item: ${c.item_name} (${c.item_status})</h4>
+                            <p style="margin: 0 0 6px 0; font-size: 14px; color: #94a3b8;">
+                                📝 <strong>Submitted Details:</strong> GR: ${c.gr_number} | Mobile: ${c.mobile}
+                            </p>
+                            <p style="margin: 0 0 8px 0; font-size: 13px; color: #fca5a5; background: rgba(239, 68, 68, 0.1); padding: 6px 8px; border-radius: 4px; width: fit-content;">
+                                🛡️ <strong>Verified Account:</strong> ${c.real_name} (${c.real_email})
+                            </p>
+                            <small style="color: #64748b;">Logged at: ${new Date(c.created_at).toLocaleString()}</small>
+                        </div>
+                    `).join('');
+                } else {
+                    feed.innerHTML = "<p style='color: #64748b;'>No security claims logged yet.</p>";
+                }
+            } catch (error) {
+                feed.innerHTML = "<p style='color: #ef4444;'>Failed to load security claims log.</p>";
+            }
+        };
+
+        document.addEventListener("DOMContentLoaded", loadClaimsLog);
+    </script>
+</body>
+</html>
