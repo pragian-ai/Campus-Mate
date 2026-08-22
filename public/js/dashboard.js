@@ -1,15 +1,13 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // 1. Check if the user has a wristband (token)
     const token = localStorage.getItem("campusx_token");
     const userString = localStorage.getItem("campusx_user");
 
     // If no token exists, redirect to login immediately
     if (!token || !userString) {
         window.location.href = "/pages/login.html";
-        return; // Stop running any more code
+        return; 
     }
 
-    // 2. Parse the user data we saved during login
     const user = JSON.parse(userString);
 
     // 3. Update the UI with the user's data

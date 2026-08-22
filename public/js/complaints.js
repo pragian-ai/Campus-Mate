@@ -96,3 +96,16 @@ document.addEventListener("DOMContentLoaded", () => {
     // Initial load
     fetchComplaints();
 });
+
+//  Logout Logic
+const logoutBtn = document.getElementById("logoutBtn");
+    if (logoutBtn) {
+        logoutBtn.addEventListener("click", () => {
+            // Destroy the wristband and user data
+            localStorage.removeItem("campusx_token");
+            localStorage.removeItem("campusx_user");
+            
+            // Send back to login
+            window.location.href = "/pages/login.html";
+        });
+};

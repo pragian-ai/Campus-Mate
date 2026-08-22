@@ -1,12 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const { getQueues, updateQueue } = require("../controllers/queues.controller");
 const verifyToken = require("../middleware/auth");
+const { getQueues, updateQueue, createQueue } = require("../controllers/queues.controller");
 
-// GET /api/queues - View all queues
 router.get("/", verifyToken, getQueues);
-
-// PUT /api/queues - Update a queue (Admin feature)
 router.put("/", verifyToken, updateQueue);
+router.post("/", verifyToken, createQueue);
 
 module.exports = router;

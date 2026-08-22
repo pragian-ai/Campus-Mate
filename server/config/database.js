@@ -61,6 +61,22 @@ db.run(`CREATE TABLE IF NOT EXISTS events (
     if (err) console.error("Error creating events table:", err);
 });
 
+// Create Queues Table
+db.run(`CREATE TABLE IF NOT EXISTS queues (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    facility_name TEXT NOT NULL,
+    people_waiting INTEGER DEFAULT 0,
+    estimated_wait_min INTEGER DEFAULT 0,
+    status TEXT DEFAULT 'Normal',
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+)`, (err) => {
+    if (err) {
+        console.error("Error creating queues table:", err);
+    } else {
+        console.log("Queues table ready!");
+    }
+});
+
 // Create Complaints Table
 db.run(`CREATE TABLE IF NOT EXISTS complaints (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
