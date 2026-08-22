@@ -46,5 +46,19 @@ db.run(`CREATE TABLE IF NOT EXISTS lost_found (
 )`, (err) => {
     if (err) console.error("Error creating lost_found table:", err);
 });
+// Create Events Table
+db.run(`CREATE TABLE IF NOT EXISTS events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    description TEXT,
+    date TEXT NOT NULL,
+    time TEXT NOT NULL,
+    location TEXT NOT NULL,
+    created_by INTEGER,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (created_by) REFERENCES users(id)
+)`, (err) => {
+    if (err) console.error("Error creating events table:", err);
+});
 
 module.exports = db;
