@@ -34,6 +34,12 @@ app.use("/api/auth", authRoutes);
 const lostFoundRoutes = require("./routes/lostFound.routes");
 app.use("/api/lost-found", lostFoundRoutes);
 
+const eventsRoutes = require("./routes/events.routes");
+app.use("/api/events", eventsRoutes);
+
+const queuesRoutes = require("./routes/queues.routes");
+app.use("/api/queues", queuesRoutes);
+
 // =================================
 // FRONTEND
 // =================================
