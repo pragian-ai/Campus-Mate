@@ -61,4 +61,18 @@ db.run(`CREATE TABLE IF NOT EXISTS events (
     if (err) console.error("Error creating events table:", err);
 });
 
+// Create Complaints Table
+db.run(`CREATE TABLE IF NOT EXISTS complaints (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    description TEXT NOT NULL,
+    category TEXT NOT NULL,
+    status TEXT DEFAULT 'Submitted', 
+    user_id INTEGER,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+)`, (err) => {
+    if (err) console.error("Error creating complaints table:", err);
+});
+
 module.exports = db;

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Complaints — CampusX</title>
+  </head>
+  <body style="display: flex; margin: 0; font-family: sans-serif; background: #f7f7f5;">
+    
+    <!-- Sidebar -->
+    <aside style="width: 250px; background: #151619; color: white; height: 100vh; padding: 20px; position: sticky; top: 0;">
+      <h2>◆ CampusX</h2>
+      <ul style="list-style: none; padding: 0; margin-top: 30px; line-height: 2;">
+        <li><a href="/pages/dashboard.html" style="color: #aaa; text-decoration: none;">Dashboard</a></li>
+        <li><a href="/pages/lost-found.html" style="color: #aaa; text-decoration: none;">Lost & Found</a></li>
+        <li><a href="/pages/events.html" style="color: #aaa; text-decoration: none;">Events</a></li>
+        <li><a href="/pages/smart-wait.html" style="color: #aaa; text-decoration: none;">Smart Wait</a></li>
+        <li><a href="/pages/complaints.html" style="color: white; text-decoration: none;">Complaints</a></li>
+      </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main style="flex: 1; padding: 40px;">
+      <h1>Help Desk & Complaints</h1>
+      
+      <!-- Complaint Form -->
+      <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 40px; max-width: 600px;">
+        <h3>Report an Issue</h3>
+        <form id="complaintForm" style="display: flex; flex-direction: column; gap: 15px;">
+          
+          <input type="text" id="title" placeholder="Issue Title (e.g., Wi-Fi not working)" required style="padding: 10px;" />
+          
+          <select id="category" required style="padding: 10px;">
+            <option value="" disabled selected>Select Category...</option>
+            <option value="Infrastructure">Infrastructure (AC, Desks, etc.)</option>
+            <option value="IT & Network">IT & Network (Wi-Fi, Portals)</option>
+            <option value="Hostel">Hostel</option>
+            <option value="Cleanliness">Cleanliness</option>
+            <option value="Other">Other</option>
+          </select>
+
+          <textarea id="description" placeholder="Describe the problem in detail..." required style="padding: 10px; height: 80px;"></textarea>
+          
+          <button type="submit" style="background: #151619; color: white; padding: 12px; border: none; border-radius: 6px; cursor: pointer;">Submit Ticket</button>
+        </form>
+      </div>
+
+      <!-- My Complaints Feed -->
+      <h3>My Tickets</h3>
+      <div id="complaintsFeed" style="display: grid; gap: 15px; max-width: 600px;">
+        <p>Loading your tickets...</p>
+      </div>
+    </main>
+
+    <script src="/js/complaints.js"></script>
+  </body>
+</html>
