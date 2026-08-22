@@ -1,0 +1,15 @@
+# Dependency directories
+node_modules/
+
+# Environment variables (Never share your secrets!)
+.env
+
+# Database files (We don't want to upload the actual local data)
+database/campusx.db
+database/campusx.db-journal
+database/campusx.db-wal
+database/campusx.db-shm
+
+# OS generated files
+.DS_Store
+Thumbs.db
