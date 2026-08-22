@@ -1,7 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
     const token = localStorage.getItem("campusx_token");
     
-    // Protect the page
     if (!token) {
         window.location.href = "/pages/login.html";
         return;
@@ -31,33 +30,30 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         queuesFeed.innerHTML = queues.map(queue => {
-            // Determine colors based on status
-            let statusColor = "#166534"; // Green for Normal
+            let statusColor = "#166534"; 
             let statusBg = "#dcfce7";
             
             if (queue.status === "Busy") {
-                statusColor = "#9a3412"; // Orange for Busy
+                statusColor = "#9a3412"; 
                 statusBg = "#ffedd5";
             } else if (queue.status === "Very Busy") {
-                statusColor = "#991b1b"; // Red for Very Busy
+                statusColor = "#991b1b"; 
                 statusBg = "#fee2e2";
             }
 
             return `
-                <div style="background: white; padding: 25px; border-radius: 12px; border: 1px solid #ddd; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
+                <div style="background: white; padding: 25px; border-radius: 12px; border: 1px solid #ddd;">
                     <h3 style="margin: 0 0 15px 0; font-size: 20px;">${queue.facility_name}</h3>
-                    
                     <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
                         <div>
-                            <p style="margin: 0; color: #666; font-size: 12px; text-transform: uppercase;">People Waiting</p>
+                            <p style="margin: 0; color: #666; font-size: 12px;">PEOPLE WAITING</p>
                             <p style="margin: 5px 0 0 0; font-size: 24px; font-weight: bold;">👤 ${queue.people_waiting}</p>
                         </div>
                         <div style="text-align: right;">
-                            <p style="margin: 0; color: #666; font-size: 12px; text-transform: uppercase;">Est. Wait</p>
+                            <p style="margin: 0; color: #666; font-size: 12px;">EST. WAIT</p>
                             <p style="margin: 5px 0 0 0; font-size: 24px; font-weight: bold;">⏱ ${queue.estimated_wait_min}m</p>
                         </div>
                     </div>
-
                     <div style="display: inline-block; background: ${statusBg}; color: ${statusColor}; padding: 6px 12px; border-radius: 20px; font-size: 14px; font-weight: 600;">
                         Status: ${queue.status}
                     </div>
@@ -66,9 +62,18 @@ document.addEventListener("DOMContentLoaded", () => {
         }).join('');
     };
 
-    // Load data immediately
     fetchQueues();
-    
-    // Optional: Refresh data every 30 seconds for that "live" feel
-    setInterval(fetchQueues, 30000);
 });
+
+// 4. Logout Logic
+    const logoutBtn = document.getElementById("logoutBtn");
+    if (logoutBtn) {
+        logoutBtn.addEventListener("click", () => {
+            // Destroy the wristband and user data
+            localStorage.removeItem("campusx_token");
+            localStorage.removeItem("campusx_user");
+            
+            // Send back to login
+            window.location.href = "/pages/login.html";
+        });
+};

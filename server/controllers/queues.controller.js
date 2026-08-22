@@ -19,4 +19,19 @@ const updateQueue = (req, res) => {
     });
 };
 
-module.exports = { getQueues, updateQueue };
+const createQueue = (req, res) => {
+    const { facility_name, people_waiting, estimated_wait_min, status } = req.body;
+    
+    if (!facility_name) {
+        return res.status(400).json({ success: false, message: "Facility name is required." });
+    }
+
+    const sql = `INSERT INTO queues (facility_name, people_waiting, estimated_wait_min, status) VALUES (?, ?, ?, ?)`;
+    
+    db.run(sql, [facility_name, people_waiting || 0, estimated_wait_min || 0, status || 'Normal'], function(err) {
+        if (err) return res.status(500).json({ success: false, message: "Database error." });
+        res.status(201).json({ success: true, message: "Queue added successfully!" });
+    });
+};
+
+module.exports = { getQueues, updateQueue, createQueue };
