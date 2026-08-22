@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard — CampusX</title>
+    <!-- We will style the dashboard in the next step -->
+  </head>
+  <body>
+    
+    <div style="display: flex;">
+      <!-- Temporary Sidebar (We will make this a reusable component later) -->
+      <aside style="width: 250px; background: #151619; color: white; height: 100vh; padding: 20px;">
+        <h2>◆ CampusX</h2>
+        <ul style="list-style: none; padding: 0; margin-top: 30px; line-height: 2;">
+          <li><a href="/pages/dashboard.html" style="color: white; text-decoration: none;">Dashboard</a></li>
+          <li><a href="#" style="color: #aaa; text-decoration: none;">Lost & Found</a></li>
+          <li><a href="#" style="color: #aaa; text-decoration: none;">Events</a></li>
+          <li style="margin-top: 50px;"><button id="logoutBtn" style="background: red; color: white; border: none; padding: 10px; cursor: pointer; border-radius: 5px;">Logout</button></li>
+        </ul>
+      </aside>
+
+      <!-- Main Content -->
+      <main style="flex: 1; padding: 40px; font-family: sans-serif;">
+        <p style="color: #666; font-size: 12px; letter-spacing: 1px;">WELCOME BACK</p>
+        <h1 id="welcomeMessage">Loading...</h1>
+        
+        <div style="margin-top: 30px; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+          <h3>Your Digital ID</h3>
+          <p><strong>Name:</strong> <span id="profileName">...</span></p>
+          <p><strong>Email:</strong> <span id="profileEmail">...</span></p>
+          <p><strong>Role:</strong> <span id="profileRole">...</span></p>
+        </div>
+      </main>
+    </div>
+
+    <script src="/js/dashboard.js"></script>
+  </body>
+</html>
