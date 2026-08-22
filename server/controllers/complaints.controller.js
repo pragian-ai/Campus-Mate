@@ -1,26 +1,19 @@
 const db = require("../config/database");
 
-const submitComplaint = (req, res) => {
-    const { title, description, category } = req.body;
-    const userId = req.user.id; 
-
-    if (!title || !description || !category) {
-        return res.status(400).json({ success: false, message: "All fields are required." });
-    }
-
-    const sql = `INSERT INTO complaints (title, description, category, user_id) VALUES (?, ?, ?, ?)`;
-    db.run(sql, [title, description, category, userId], function(err) {
-        if (err) return res.status(500).json({ success: false, message: "Database error." });
-        res.status(201).json({ success: true, message: "Complaint submitted!", complaintId: this.lastID });
+const createComplaint = (req, res) => {
+    const { title, category, description } = req.body;
+    const sql = "INSERT INTO complaints (title, category, description) VALUES (?, ?, ?)";
+    db.run(sql, [title, category, description], (err) => {
+        if (err) return res.status(500).json({ success: false, message: "Error saving complaint" });
+        res.status(201).json({ success: true, message: "Complaint submitted!" });
     });
 };
 
-const getMyComplaints = (req, res) => {
-    const userId = req.user.id;
-    db.all("SELECT * FROM complaints WHERE user_id = ? ORDER BY created_at DESC", [userId], (err, rows) => {
+const getComplaints = (req, res) => {
+    db.all("SELECT * FROM complaints ORDER BY created_at DESC", [], (err, rows) => {
         if (err) return res.status(500).json({ success: false, message: "Database error." });
         res.json({ success: true, data: rows });
     });
 };
 
-module.exports = { submitComplaint, getMyComplaints };
+module.exports = { createComplaint, getComplaints };

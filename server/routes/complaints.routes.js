@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const { submitComplaint, getMyComplaints } = require("../controllers/complaints.controller");
+const { createComplaint, getComplaints } = require("../controllers/complaints.controller");
 const verifyToken = require("../middleware/auth");
+const verifyAdmin = require("../middleware/admin");
 
-router.post("/", verifyToken, submitComplaint);
-router.get("/", verifyToken, getMyComplaints);
+router.post("/", verifyToken, createComplaint);
+router.get("/admin/all", verifyToken, verifyAdmin, getComplaints);
 
 module.exports = router;

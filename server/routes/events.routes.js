@@ -1,12 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const { getAllEvents, createEvent } = require("../controllers/events.controller");
+const { getEvents, createEvent } = require("../controllers/events.controller");
 const verifyToken = require("../middleware/auth");
+const verifyAdmin = require("../middleware/admin");
 
-// GET /api/events - View all events
-router.get("/", verifyToken, getAllEvents);
-
-// POST /api/events - Create a new event
-router.post("/", verifyToken, createEvent);
+router.get("/", verifyToken, getEvents); // Students & Admins can view
+router.post("/", verifyToken, verifyAdmin, createEvent); // ONLY Admins can post
 
 module.exports = router;

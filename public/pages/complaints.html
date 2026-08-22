@@ -1,58 +1,109 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Complaints — CampusX</title>
-  </head>
-  <body style="display: flex; margin: 0; font-family: sans-serif; background: #f7f7f5;">
-    
-    <!-- Sidebar -->
-    <aside style="width: 250px; background: #151619; color: white; height: 100vh; padding: 20px; position: sticky; top: 0;">
-      <h2>◆ CampusX</h2>
-      <ul style="list-style: none; padding: 0; margin-top: 30px; line-height: 2;">
-        <li><a href="/pages/dashboard.html" style="color: #aaa; text-decoration: none;">Dashboard</a></li>
-            <li><a href="/pages/lost-found.html" style="color: #aaa; text-decoration: none;">Lost & Found</a></li>
-            <li><a href="/pages/events.html" style="color: #aaa; text-decoration: none;">Events</a></li>
-            <li><a href="/pages/smart-wait.html" style="color: #aaa; text-decoration: none;">Smart Wait</a></li>
-            <li><a href="/pages/complaints.html" style="color: white; text-decoration: none;">Complaints</a></li>
-            <li style="margin-top: 50px;"><button id="logoutBtn" style="background: red; color: white; border: none; padding: 10px; cursor: pointer; border-radius: 5px;">Logout</button></li>
-      </ul>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complaints — CampusMate</title>
+    <style>
+        body { margin: 0; font-family: 'Inter', system-ui, sans-serif; background: #f3f4f6; display: flex; height: 100vh; color: #1f2937; }
+        aside { width: 250px; background: #0f172a; color: white; padding: 24px; display: flex; flex-direction: column; }
+        aside h2 { color: #60a5fa; margin-top: 0; font-size: 24px; }
+        aside a { color: #9ca3af; text-decoration: none; padding: 12px 0; display: block; transition: color 0.2s; }
+        aside a:hover, aside a.active { color: white; font-weight: 600; }
+        main { flex: 1; padding: 40px; overflow-y: auto; }
+        .header { margin-bottom: 30px; }
+        .header h1 { margin: 0; font-size: 28px; }
+        #complaintForm { background: white; padding: 24px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 30px; border-top: 4px solid #f59e0b; }
+        .input-group { display: flex; gap: 15px; margin-bottom: 15px; }
+        input, select, textarea { flex: 1; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; font-family: inherit; outline: none; }
+        button { background: #f59e0b; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600; }
+        button:hover { background: #d97706; }
+        #formMessage { margin-top: 15px; font-weight: bold; text-align: center; }
+    </style>
+</head>
+<body>
+    <aside>
+        <h2>◆ CampusMate</h2>
+        <nav style="margin-top: 30px; flex: 1;">
+            <a href="/pages/dashboard.html">📊 Dashboard</a>
+            <a href="/pages/lost-found.html">🔍 Lost & Found</a>
+            <a href="/pages/events.html">📅 Events</a>
+            <a href="/pages/smart-wait.html">⏱️ Smart Wait</a>
+            <a href="/pages/complaints.html" class="active">⚠️ Complaints</a>
+            <a href="/pages/assistant.html">🤖 Assistant</a>
+            <a href="/pages/sos.html" style="color: #fca5a5;">🚨 SOS</a>
+        </nav>
+        <a href="#" id="logoutBtn" style="color: #ef4444; font-weight: 600; text-decoration: none;" onclick="localStorage.clear(); window.location.href='/pages/login.html'">Logout</a>
     </aside>
 
-    <!-- Main Content -->
-    <main style="flex: 1; padding: 40px;">
-      <h1>Help Desk & Complaints</h1>
-      
-      <!-- Complaint Form -->
-      <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 40px; max-width: 600px;">
-        <h3>Report an Issue</h3>
-        <form id="complaintForm" style="display: flex; flex-direction: column; gap: 15px;">
-          
-          <input type="text" id="title" placeholder="Issue Title (e.g., Wi-Fi not working)" required style="padding: 10px;" />
-          
-          <select id="category" required style="padding: 10px;">
-            <option value="" disabled selected>Select Category...</option>
-            <option value="Infrastructure">Infrastructure (AC, Desks, etc.)</option>
-            <option value="IT & Network">IT & Network (Wi-Fi, Portals)</option>
-            <option value="Hostel">Hostel</option>
-            <option value="Cleanliness">Cleanliness</option>
-            <option value="Other">Other</option>
-          </select>
-
-          <textarea id="description" placeholder="Describe the problem in detail..." required style="padding: 10px; height: 80px;"></textarea>
-          
-          <button type="submit" style="background: #151619; color: white; padding: 12px; border: none; border-radius: 6px; cursor: pointer;">Submit Ticket</button>
+    <main>
+        <div class="header">
+            <h1>Help Desk & Complaints</h1>
+            <p style="color: #6b7280; margin-top: 5px;">Submit facility issues directly to the administration.</p>
+        </div>
+        
+        <form id="complaintForm">
+            <div class="input-group">
+                <input type="text" id="cTitle" placeholder="Issue Title (e.g., Broken AC in Lib)" required autocomplete="off">
+                <select id="cCategory" required>
+                    <option value="" disabled selected>Select Category</option>
+                    <option value="IT">IT & WiFi</option>
+                    <option value="Maintenance">Maintenance</option>
+                    <option value="Cleanliness">Cleanliness</option>
+                </select>
+            </div>
+            <textarea id="cDesc" placeholder="Describe the issue in detail..." rows="4" required></textarea>
+            <div style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center;">
+                <div id="formMessage"></div>
+                <button type="submit">Submit Ticket</button>
+            </div>
         </form>
-      </div>
-
-      <!-- My Complaints Feed -->
-      <h3>My Tickets</h3>
-      <div id="complaintsFeed" style="display: grid; gap: 15px; max-width: 600px;">
-        <p>Loading your tickets...</p>
-      </div>
     </main>
 
-    <script src="/js/complaints.js"></script>
-  </body>
+    <script>
+        document.getElementById("complaintForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const token = localStorage.getItem("campusx_token");
+            const msgBox = document.getElementById("formMessage");
+            
+            if (!token) {
+                window.location.href = "/pages/login.html";
+                return;
+            }
+
+            const title = document.getElementById("cTitle").value;
+            const category = document.getElementById("cCategory").value;
+            const description = document.getElementById("cDesc").value;
+
+            msgBox.textContent = "Submitting...";
+            msgBox.style.color = "#f59e0b";
+
+            try {
+                const res = await fetch("/api/complaints", {
+                    method: "POST",
+                    headers: { 
+                        "Content-Type": "application/json", 
+                        "Authorization": `Bearer ${token}` 
+                    },
+                    body: JSON.stringify({ title, category, description })
+                });
+                
+                const data = await res.json();
+                
+                if (data.success) {
+                    msgBox.textContent = "✅ Complaint submitted successfully!";
+                    msgBox.style.color = "#10b981";
+                    e.target.reset();
+                    setTimeout(() => msgBox.textContent = "", 3000);
+                } else {
+                    msgBox.textContent = "❌ Error: " + data.message;
+                    msgBox.style.color = "#ef4444";
+                }
+            } catch (error) {
+                msgBox.textContent = "❌ Connection failed.";
+                msgBox.style.color = "#ef4444";
+            }
+        });
+    </script>
+</body>
 </html>

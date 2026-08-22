@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Complaints — CampusMate</title>
+    <style>
+        body { margin: 0; font-family: 'Inter', system-ui, sans-serif; background: #0f172a; display: flex; height: 100vh; color: #f8fafc; }
+        aside { width: 250px; background: #020617; padding: 24px; border-right: 1px solid #1e293b; display: flex; flex-direction: column; }
+        aside h2 { color: #ef4444; margin-top: 0; font-size: 24px; }
+        aside a { color: #94a3b8; text-decoration: none; padding: 12px 16px; display: block; border-radius: 8px; margin-bottom: 4px; transition: 0.2s;}
+        aside a:hover, aside a.active { background: #1e293b; color: white; font-weight: 600; border-left: 3px solid #ef4444; }
+        main { flex: 1; padding: 40px; overflow-y: auto; }
+        .card { background: #1e293b; padding: 24px; border-radius: 12px; border-left: 4px solid #f59e0b; margin-bottom: 15px; }
+        .card h3 { margin: 0 0 8px 0; color: #f8fafc; }
+        .badge { background: #78350f; color: #fcd34d; padding: 4px 10px; border-radius: 9999px; font-size: 12px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <aside>
+        <h2>🛡️ Admin Panel</h2>
+        <nav style="margin-top: 30px; flex: 1;">
+            <a href="/pages/admin.html">📊 Overview & SOS</a>
+            <a href="/pages/admin-events.html">📅 Manage Events</a>
+            <a href="/pages/admin-lost-found.html">🔍 Lost & Found</a>
+            <a href="/pages/admin-complaints.html" class="active">⚠️ Complaints</a>
+        </nav>
+        <a href="/pages/login.html" onclick="localStorage.clear()" style="color: #ef4444; margin-top: auto;">Logout</a>
+    </aside>
+    <main>
+        <h1 style="border-bottom: 1px solid #1e293b; padding-bottom: 20px;">Active Complaints</h1>
+        <div id="feed"><p style="color: #64748b;">Loading complaints...</p></div>
+    </main>
+ <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        const token = localStorage.getItem("campusx_token");
+        const role = localStorage.getItem("campusx_role");
+        const feed = document.getElementById("feed");
+
+        if (!token || role !== "admin") return window.location.href = "/pages/login.html";
+
+        try {
+            const res = await fetch("/api/complaints/admin/all", { 
+                headers: { "Authorization": `Bearer ${token}` } 
+            });
+            const data = await res.json();
+            
+            if (data.success && data.data && data.data.length > 0) {
+                feed.innerHTML = data.data.map(c => `
+                    <div class="card">
+                        <h3>${c.title} <span class="badge" style="float:right;">${c.category}</span></h3>
+                        <p style="color: #94a3b8; font-size: 14px;">${c.description}</p>
+                        <span style="color: #64748b; font-size: 12px;">Reported: ${new Date(c.created_at).toLocaleString()}</span>
+                    </div>
+                `).join('');
+            } else if (!data.success) {
+                // THIS WILL SHOW US THE ERROR!
+                feed.innerHTML = `<p style="color: #ef4444;">Backend Blocked It: ${data.message}</p>`;
+            } else {
+                feed.innerHTML = "<p>No active complaints.</p>";
+            }
+        } catch (error) {
+            feed.innerHTML = `<p style="color: #ef4444;">Server offline or connection failed.</p>`;
+        }
+    });
+</script>
+</body>
+</html>

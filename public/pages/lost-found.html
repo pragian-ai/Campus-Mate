@@ -1,64 +1,146 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lost & Found — CampusMate</title>
-  </head>
-  <body style="display: flex; margin: 0; font-family: sans-serif; background: #f7f7f5;">
-    
-    <!-- Sidebar -->
-    <aside style="width: 250px; background: #151619; color: white; height: 100vh; padding: 20px;">
-      <h2>◆ CampusX</h2>
-      <ul style="list-style: none; padding: 0; margin-top: 30px; line-height: 2;">
-        <li><a href="/pages/dashboard.html" style="color: #aaa; text-decoration: none;">Dashboard</a></li>
-            <li><a href="/pages/lost-found.html" style="color: white; text-decoration: none;">Lost & Found</a></li>
-            <li><a href="/pages/events.html" style="color: #aaa; text-decoration: none;">Events</a></li>
-            <li><a href="/pages/smart-wait.html" style="color: #aaa; text-decoration: none;">Smart Wait</a></li>
-            <li><a href="/pages/complaints.html" style="color: #aaa; text-decoration: none;">Complaints</a></li>
-            <li style="margin-top: 50px;"><button id="logoutBtn" style="background: red; color: white; border: none; padding: 10px; cursor: pointer; border-radius: 5px;">Logout</button></li>
-      </ul>
+    <style>
+        body { margin: 0; font-family: 'Inter', system-ui, sans-serif; background: #f4f7fe; display: flex; height: 100vh; color: #1e293b; }
+        aside { width: 250px; background: #0f172a; color: white; padding: 24px; display: flex; flex-direction: column; }
+        aside h2 { color: #3b82f6; margin-top: 0; font-size: 24px; letter-spacing: 1px; }
+        aside a { color: #94a3b8; text-decoration: none; padding: 12px 16px; display: block; border-radius: 8px; margin-bottom: 5px; transition: 0.2s; font-weight: 500; }
+        aside a:hover, aside a.active { background: #1e293b; color: white; font-weight: 600; border-left: 3px solid #3b82f6; }
+        main { flex: 1; padding: 40px; overflow-y: auto; display: flex; flex-direction: column; gap: 30px; }
+        .header h1 { margin: 0 0 5px 0; font-size: 32px; color: #0f172a; }
+        .header p { margin: 0; color: #64748b; font-size: 16px; }
+        #itemsFeed { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .item-card { background: white; padding: 24px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); display: flex; flex-direction: column; justify-content: space-between; border: 1px solid #e2e8f0; }
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 9999px; font-size: 12px; font-weight: 700; margin-bottom: 12px; text-transform: uppercase; width: fit-content; }
+        .badge.lost { background: #fee2e2; color: #991b1b; }
+        .badge.found { background: #dcfce7; color: #166534; }
+        .badge.claimed { background: #e2e8f0; color: #334155; }
+        .item-title { margin: 0 0 8px 0; font-size: 20px; color: #0f172a; }
+        .item-meta { font-size: 13px; color: #64748b; margin-bottom: 12px; display: flex; flex-direction: column; gap: 4px; }
+        
+        .claim-btn { background: #3b82f6; color: white; border: none; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; margin-top: 15px; width: 100%; transition: 0.2s; }
+        .claim-btn:hover { background: #2563eb; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 1000; }
+        .modal-content { background: white; padding: 30px; border-radius: 16px; width: 100%; max-width: 380px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
+        .modal-content h3 { margin: 0 0 5px 0; font-size: 20px; color: #0f172a; }
+        .modal-content p { font-size: 13px; color: #64748b; margin-bottom: 20px; line-height: 1.4; }
+        .modal input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 15px; outline: none; }
+        .modal input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+        .modal-actions { display: flex; gap: 12px; }
+        .btn-cancel { background: #f1f5f9; color: #475569; padding: 12px; flex: 1; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
+        .btn-submit { background: #10b981; color: white; padding: 12px; flex: 1; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <aside>
+        <h2>◆ CampusMate</h2>
+        <nav style="margin-top: 30px;">
+            <a href="/pages/dashboard.html">📊 Dashboard</a>
+            <a href="/pages/lost-found.html" class="active">🔍 Lost & Found</a>
+            <a href="/pages/events.html">📅 Events</a>
+            <a href="/pages/smart-wait.html">⏱️ Smart Wait</a>
+            <a href="/pages/complaints.html">⚠️ Complaints</a>
+            <a href="/pages/assistant.html">🤖 Assistant</a>
+            <a href="/pages/sos.html" style="color: #fca5a5;">🚨 SOS</a>
+        </nav>
     </aside>
-
-    <!-- Main Content -->
-    <main style="flex: 1; padding: 40px;">
-      <h1>Lost & Found</h1>
-      
-      <!-- Report Form -->
-      <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 40px; max-width: 600px;">
-        <h3>Report an Item</h3>
-        <form id="reportForm" style="display: flex; flex-direction: column; gap: 15px;">
-          
-          <select id="type" required style="padding: 10px;">
-            <option value="lost">I lost something</option>
-            <option value="found">I found something</option>
-          </select>
-
-          <input type="text" id="title" placeholder="Item Name (e.g., Blue Milton Bottle)" required style="padding: 10px;" />
-          
-          <input type="text" id="location" placeholder="Location (e.g., Block B, Room 204)" required style="padding: 10px;" />
-          
-          <select id="category" style="padding: 10px;">
-            <option value="electronics">Electronics</option>
-            <option value="documents">ID/Documents</option>
-            <option value="accessories">Accessories</option>
-            <option value="other">Other</option>
-          </select>
-
-          <textarea id="description" placeholder="Any extra details?" style="padding: 10px; height: 80px;"></textarea>
-
-          <button type="submit" style="background: #151619; color: white; padding: 12px; border: none; border-radius: 6px; cursor: pointer;">Submit Report</button>
-        </form>
-      </div>
-
-      <!-- Items Feed -->
-      <h3>Recent Reports</h3>
-      <div id="itemsFeed" style="display: grid; gap: 15px; max-width: 600px;">
-        <!-- Items will be injected here by JavaScript -->
-        <p>Loading items...</p>
-      </div>
+    <main>
+        <div class="header">
+            <h1 style="margin: 0; font-size: 28px;">Lost & Found</h1>
+            <p style="color: #6b7280; margin-top: 5px;">View items reported around campus.</p>
+        </div>
+        <div id="itemsFeed"><p>Loading items...</p></div>
     </main>
 
-    <script src="/js/lost-found.js"></script>
-  </body>
+    <div class="modal" id="claimModal">
+        <div class="modal-content">
+            <h3>Secure Claim Verification</h3>
+            <p>Your logged-in student account credentials will be securely bound to this claim record to prevent false submissions.</p>
+            <input type="hidden" id="claimItemId">
+            <input type="text" id="claimGR" placeholder="GR Number (e.g., GR12345)" required autocomplete="off">
+            <input type="tel" id="claimMobile" placeholder="Contact Mobile Number" required autocomplete="off">
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+                <button class="btn-submit" onclick="submitClaim()">Submit Claim</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const token = localStorage.getItem("campusx_token");
+        if (!token) window.location.href = "/pages/login.html";
+
+        const fetchItems = async () => {
+            const feed = document.getElementById("itemsFeed");
+            try {
+                const res = await fetch("/api/lost-found", { headers: { "Authorization": `Bearer ${token}` } });
+                const data = await res.json();
+                
+                if (data.success && data.data.length > 0) {
+                    feed.innerHTML = data.data.map(item => {
+                        const statusLower = item.status.toLowerCase();
+                        let badgeClass = "found";
+                        if (statusLower === "lost") badgeClass = "lost";
+                        if (statusLower === "claimed") badgeClass = "claimed";
+                        const isClaimed = statusLower === "claimed";
+
+                        return `
+                            <div class="item-card">
+                                <div>
+                                    <span class="badge ${badgeClass}">${item.status}</span>
+                                    <h4 class="item-title">${item.name}</h4>
+                                    <div class="item-meta">
+                                        <span>📍 <strong>Location:</strong> ${item.location}</span>
+                                        <span>📞 <strong>Contact:</strong> ${item.contact}</span>
+                                    </div>
+                                    <p style="margin: 0 0 15px 0; font-size: 14px; color: #4b5563;">${item.description || 'No description provided.'}</p>
+                                </div>
+                                <button class="claim-btn" ${isClaimed ? 'disabled style="background: #9ca3af; cursor: not-allowed;"' : `onclick="openModal(${item.id})"`}>
+                                    ${isClaimed ? 'Item Claimed' : 'Claim This Item'}
+                                </button>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    feed.innerHTML = "<p>No lost or found items reported.</p>";
+                }
+            } catch (error) {
+                feed.innerHTML = "<p>Error loading items.</p>";
+            }
+        };
+
+        const modal = document.getElementById("claimModal");
+        const openModal = (id) => { document.getElementById("claimItemId").value = id; modal.style.display = "flex"; };
+        const closeModal = () => { modal.style.display = "none"; };
+
+        const submitClaim = async () => {
+            const payload = {
+                item_id: document.getElementById("claimItemId").value,
+                gr_number: document.getElementById("claimGR").value,
+                mobile: document.getElementById("claimMobile").value
+            };
+
+            const res = await fetch("/api/lost-found/claim", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            
+            if(data.success) {
+                alert("✅ " + data.message);
+                closeModal();
+                fetchItems();
+            } else {
+                alert("❌ Error: " + data.message);
+            }
+        };
+
+        document.addEventListener("DOMContentLoaded", fetchItems);
+    </script>
+</body>
 </html>

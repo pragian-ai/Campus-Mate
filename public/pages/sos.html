@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency SOS — CampusMate</title>
+    <style>
+        body { margin: 0; font-family: 'Inter', system-ui, sans-serif; background: #f4f7fe; display: flex; height: 100vh; color: #1e293b; }
+        aside { width: 250px; background: #0f172a; color: white; padding: 24px; display: flex; flex-direction: column; }
+        aside h2 { color: #3b82f6; margin-top: 0; font-size: 24px; letter-spacing: 1px; }
+        aside a { color: #94a3b8; text-decoration: none; padding: 12px 16px; display: block; border-radius: 8px; margin-bottom: 5px; transition: 0.2s; font-weight: 500; }
+        aside a:hover, aside a.active { background: #1e293b; color: white; font-weight: 600; border-left: 3px solid #3b82f6; }
+        
+        main { flex: 1; padding: 40px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        
+        .sos-btn { 
+            width: 240px; height: 240px; border-radius: 50%; 
+            background: #dc2626; color: white; font-size: 32px; font-weight: bold; 
+            border: 8px solid #fca5a5; cursor: pointer; 
+            box-shadow: 0 10px 25px rgba(220, 38, 38, 0.4); 
+            transition: transform 0.1s, background 0.2s; 
+            display: flex; align-items: center; justify-content: center; text-transform: uppercase; letter-spacing: 1px;
+        }
+        .sos-btn:active { transform: scale(0.95); }
+        
+        #status { margin-top: 25px; font-size: 18px; font-weight: bold; text-align: center; }
+    </style>
+</head>
+<body>
+    <aside>
+        <h2>◆ CampusMate</h2>
+        <nav style="margin-top: 30px; flex: 1;">
+            <a href="/pages/dashboard.html">📊 Dashboard</a>
+            <a href="/pages/lost-found.html">🔍 Lost & Found</a>
+            <a href="/pages/events.html">📅 Events</a>
+            <a href="/pages/smart-wait.html">⏱️ Smart Wait</a>
+            <a href="/pages/complaints.html">⚠️ Complaints</a>
+            <a href="/pages/assistant.html">🤖 Assistant</a>
+            <a href="/pages/sos.html" class="active" style="color: #fca5a5; margin-top: 20px;">🚨 Emergency SOS</a>
+        </nav>
+        <a href="#" id="logoutBtn" style="color: #ef4444; font-weight: 600; text-decoration: none;" onclick="localStorage.clear(); window.location.href='/pages/login.html'">Logout</a>
+    </aside>
+
+    <main>
+        <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #0f172a; margin: 0 0 10px 0; font-size: 28px;">Emergency SOS Command</h1>
+            <p style="color: #64748b; margin: 0;">Pressing this button will instantly transmit your live location to campus security.</p>
+        </div>
+        
+        <button class="sos-btn" id="sosBtn">SOS</button>
+        <div id="status"></div>
+    </main>
+
+    <script src="/js/sos.js"></script>
+</body>
+</html>

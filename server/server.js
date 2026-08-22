@@ -1,91 +1,34 @@
 const express = require("express");
-const path = require("path");
-require("dotenv").config();
-
-const db = require("./config/database");
-
+const cors = require("cors");
 const app = express();
 
-const PORT = process.env.PORT || 3000;
-
-
-const verifyToken = require("./middleware/auth");
-
-
-
-// =================================
-// MIDDLEWARE (Must be first!)
-// =================================
-
+// 1. Middleware
+app.use(cors());
 app.use(express.json());
+app.use(express.static("public")); // Serves your frontend HTML/CSS/JS
 
-app.use(
-    express.urlencoded({
-        extended: true
-    })
-);
-
-// =================================
-// ROUTES 
-// =================================
+// 2. Route Imports
 const authRoutes = require("./routes/auth.routes");
-app.use("/api/auth", authRoutes);
-
 const lostFoundRoutes = require("./routes/lostFound.routes");
-app.use("/api/lost-found", lostFoundRoutes);
-
+const sosRoutes = require("./routes/sos.routes");
+const assistantRoutes = require("./routes/assistant.routes");
+const complaintsRoutes = require("./routes/complaints.routes");
 const eventsRoutes = require("./routes/events.routes");
-app.use("/api/events", eventsRoutes);
-
 const queuesRoutes = require("./routes/queues.routes");
+
+
+// 3. API Endpoints
+app.use("/api/auth", authRoutes);
+app.use("/api/lost-found", lostFoundRoutes);
+app.use("/api/sos", sosRoutes);
+app.use("/api/complaints", complaintsRoutes);
+app.use("/api/assistant", assistantRoutes);
+app.use("/api/events", eventsRoutes);
 app.use("/api/queues", queuesRoutes);
 
-const complaintsRoutes = require("./routes/complaints.routes");
-app.use("/api/complaints", complaintsRoutes);
 
-// =================================
-// FRONTEND
-// =================================
-
-app.use(
-    express.static(
-        path.join(__dirname, "../public")
-    )
-);
-
-
-
-// =================================
-// TEST API
-// =================================
-
-app.get("/api/test", (req, res) => {
-    res.json({
-        success: true,
-        message: "CampusX backend is working!"
-    });
-});
-
-app.get("/api/dashboard-data", verifyToken, (req, res) => {
-    res.json({
-        success: true,
-        message: "Welcome to the secret dashboard!",
-        user: req.user // This shows who made the request based on the token
-    });
-});
-
-// =================================
-// START SERVER
-// =================================
-
+// 4. Start Server
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log("");
-    console.log("================================");
-    console.log("       CAMPUSX SERVER");
-    console.log("================================");
-    console.log(`Server: http://localhost:${PORT}`);
-    console.log(`API:    http://localhost:${PORT}/api/test`);
-    console.log("Database: Connected");
-    console.log("================================");
-    console.log("");
+    console.log(`🚀 CampusX Server running flawlessly on port ${PORT}`);
 });

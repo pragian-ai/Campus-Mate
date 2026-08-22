@@ -1,40 +1,227 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard — CampusMate</title>
-  </head>
-  <body>
-    
-    <div style="display: flex;">
-      <!-- Temporary Sidebar (We will make this a reusable component later) -->
-    <aside style="width: 250px; background: #151619; color: white; height: 100vh; padding: 20px;">
-      <h2>◆ CampusX</h2>
-      <ul style="list-style: none; padding: 0; margin-top: 30px; line-height: 2;">
-        <li><a href="/pages/dashboard.html" style="color: white; text-decoration: none;">Dashboard</a></li>
-            <li><a href="/pages/lost-found.html" style="color: #aaa; text-decoration: none;">Lost & Found</a></li>
-            <li><a href="/pages/events.html" style="color: #aaa; text-decoration: none;">Events</a></li>
-            <li><a href="/pages/smart-wait.html" style="color: #aaa; text-decoration: none;">Smart Wait</a></li>
-            <li><a href="/pages/complaints.html" style="color: #aaa; text-decoration: none;">Complaints</a></li>
-            <li style="margin-top: 50px;"><button id="logoutBtn" style="background: red; color: white; border: none; padding: 10px; cursor: pointer; border-radius: 5px;">Logout</button></li>
-      </ul>
+    <style>
+        body { margin: 0; font-family: 'Inter', system-ui, sans-serif; background: #f4f7fe; display: flex; height: 100vh; color: #1e293b; }
+        
+        /* Sidebar Navigation */
+        aside { width: 250px; background: #0f172a; color: white; padding: 24px; display: flex; flex-direction: column; }
+        aside h2 { color: #3b82f6; margin-top: 0; font-size: 24px; letter-spacing: 1px;}
+        aside a { color: #94a3b8; text-decoration: none; padding: 12px 16px; display: block; border-radius: 8px; margin-bottom: 5px; transition: 0.2s; font-weight: 500;}
+        aside a:hover, aside a.active { background: #1e293b; color: white; font-weight: 600; border-left: 3px solid #3b82f6; }
+        
+        /* Main Workspace */
+        main { flex: 1; padding: 40px; overflow-y: auto; display: flex; flex-direction: column; gap: 30px; }
+        
+        /* Header */
+        .header { display: flex; justify-content: space-between; align-items: flex-end; }
+        .header h1 { margin: 0 0 5px 0; font-size: 32px; color: #0f172a; }
+        .header p { margin: 0; color: #64748b; font-size: 16px; }
+        
+        /* Live Stats Grid */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
+        .stat-card { background: white; padding: 24px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 20px; transition: transform 0.2s; }
+        .stat-card:hover { transform: translateY(-3px); }
+        .stat-icon { width: 50px; height: 50px; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 24px; }
+        .stat-info h3 { margin: 0; font-size: 14px; color: #64748b; font-weight: 600; text-transform: uppercase; }
+        .stat-info p { margin: 5px 0 0 0; font-size: 28px; font-weight: 800; color: #0f172a; }
+
+        /* Icon Colors */
+        .bg-blue { background: #eff6ff; color: #3b82f6; }
+        .bg-orange { background: #fff7ed; color: #f97316; }
+        .bg-purple { background: #faf5ff; color: #a855f7; }
+
+        /* Main Content Grid */
+        .content-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 25px; }
+        
+        /* Sections */
+        .section-card { background: white; padding: 24px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .section-header h2 { margin: 0; font-size: 20px; color: #0f172a; }
+        .section-header a { font-size: 14px; color: #3b82f6; text-decoration: none; font-weight: 600; }
+
+        /* Smart Wait Live Cards */
+        .live-queue-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .queue-item { border: 1px solid #e2e8f0; padding: 16px; border-radius: 12px; }
+        .queue-item h4 { margin: 0 0 10px 0; font-size: 16px; }
+        .badge { padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 700; }
+        .badge.busy { background: #fee2e2; color: #ef4444; }
+        .badge.normal { background: #dcfce7; color: #10b981; }
+        
+        /* Event List */
+        .event-list { display: flex; flex-direction: column; gap: 15px; }
+        .event-row { display: flex; gap: 15px; align-items: center; padding-bottom: 15px; border-bottom: 1px solid #f1f5f9; }
+        .event-row:last-child { border: none; padding: 0; }
+        .event-date { background: #f8fafc; padding: 10px; border-radius: 8px; text-align: center; min-width: 50px; border: 1px solid #e2e8f0; }
+        .event-date strong { display: block; font-size: 18px; color: #0f172a; }
+        .event-date span { font-size: 12px; color: #64748b; font-weight: 700; text-transform: uppercase; }
+        .event-details h4 { margin: 0 0 5px 0; font-size: 15px; }
+        .event-details p { margin: 0; font-size: 13px; color: #64748b; }
+    </style>
+</head>
+<body>
+    <aside>
+        <h2>◆ CampusMate</h2>
+        <nav style="margin-top: 30px; flex: 1;">
+            <a href="/pages/dashboard.html" class="active">📊 Dashboard</a>
+            <a href="/pages/lost-found.html">🔍 Lost & Found</a>
+            <a href="/pages/events.html">📅 Events</a>
+            <a href="/pages/smart-wait.html">⏱️ Smart Wait</a>
+            <a href="/pages/complaints.html">⚠️ Complaints</a>
+            <a href="/pages/assistant.html">🤖 Assistant</a>
+            <a href="/pages/sos.html" style="color: #fca5a5; margin-top: 20px;">🚨 Emergency SOS</a>
+        </nav>
+        <a href="#" id="logoutBtn" style="color: #ef4444; font-weight: 600; text-decoration: none;">Logout</a>
     </aside>
 
-      <!-- Main Content -->
-      <main style="flex: 1; padding: 40px; font-family: sans-serif;">
-        <p style="color: #666; font-size: 12px; letter-spacing: 1px;">WELCOME BACK</p>
-        <h1 id="welcomeMessage">Loading...</h1>
-        
-        <div style="margin-top: 30px; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
-          <h3>Your Digital ID</h3>
-          <p><strong>Name:</strong> <span id="profileName">...</span></p>
-          <p><strong>Email:</strong> <span id="profileEmail">...</span></p>
-          <p><strong>Role:</strong> <span id="profileRole">...</span></p>
+    <main>
+        <div class="header">
+            <div>
+                <h1>Welcome back, <span id="userName">Student</span>! 👋</h1>
+                <p>Here is your live campus overview.</p>
+            </div>
         </div>
-      </main>
-    </div>
 
-    <script src="/js/dashboard.js"></script>
-  </body>
+        <!-- Live Top Stats (Populated by API) -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon bg-blue">📅</div>
+                <div class="stat-info">
+                    <h3>Upcoming Events</h3>
+                    <p id="statEvents">-</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon bg-orange">⏱️</div>
+                <div class="stat-info">
+                    <h3>Active Queues</h3>
+                    <p id="statQueues">-</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon bg-purple">🔍</div>
+                <div class="stat-info">
+                    <h3>Lost & Found</h3>
+                    <p id="statLostFound">-</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-grid">
+            <!-- Smart Wait Live Feed -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h2>Live Facility Status</h2>
+                    <a href="/pages/smart-wait.html">View Map →</a>
+                </div>
+                <div class="live-queue-grid" id="dashboardQueues">
+                    <p style="color: #64748b;">Loading live facilities...</p>
+                </div>
+            </div>
+
+            <!-- Upcoming Events Feed -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h2>Next Events</h2>
+                    <a href="/pages/events.html">View All →</a>
+                </div>
+                <div class="event-list" id="dashboardEvents">
+                    <p style="color: #64748b;">Loading schedule...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            const token = localStorage.getItem("campusx_token");
+            if (!token) { window.location.href = "/pages/login.html"; return; }
+
+            // 1. Set User Name
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                if(payload.name) document.getElementById("userName").textContent = payload.name;
+            } catch (e) { }
+
+            // 2. Fetch Dashboard Data Concurrently
+            const headers = { "Authorization": `Bearer ${token}` };
+
+            try {
+                const [eventsRes, queuesRes, lfRes] = await Promise.all([
+                    fetch("/api/events", { headers }),
+                    fetch("/api/queues", { headers }),
+                    fetch("/api/lost-found", { headers })
+                ]);
+
+                const events = await eventsRes.json();
+                const queues = await queuesRes.json();
+                const lf = await lfRes.json();
+
+                // 3. Update Stat Numbers
+                if (events.success) document.getElementById("statEvents").textContent = events.data.length;
+                if (queues.success) document.getElementById("statQueues").textContent = queues.data.length;
+                if (lf.success) document.getElementById("statLostFound").textContent = lf.data.length;
+
+                // 4. Render Live Queues
+                const queuesContainer = document.getElementById("dashboardQueues");
+                if (queues.success && queues.data.length > 0) {
+                    queuesContainer.innerHTML = queues.data.slice(0, 3).map(q => {
+                        const bClass = q.status.toLowerCase() === 'busy' ? 'busy' : 'normal';
+                        return `
+                        <div class="queue-item">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                <h4>${q.facility_name}</h4>
+                                <span class="badge ${bClass}">${q.status}</span>
+                            </div>
+                            <p style="margin: 0; font-size: 13px; color: #64748b;">👥 Wait: ${q.people_waiting} people</p>
+                            <p style="margin: 5px 0 0 0; font-size: 13px; color: #64748b;">⏱️ Est: ${q.estimated_wait_min} mins</p>
+                        </div>
+                        `;
+                    }).join('');
+                } else {
+                    queuesContainer.innerHTML = "<p>No active queues.</p>";
+                }
+
+                // 5. Render Upcoming Events
+                const eventsContainer = document.getElementById("dashboardEvents");
+                if (events.success && events.data.length > 0) {
+                    eventsContainer.innerHTML = events.data.slice(0, 3).map(e => {
+                        // Attempt to format the date string (e.date)
+                        const d = new Date(e.date);
+                        const day = isNaN(d.getDate()) ? "!" : d.getDate();
+                        const month = isNaN(d.getMonth()) ? "DATE" : d.toLocaleString('default', { month: 'short' });
+                        
+                        return `
+                        <div class="event-row">
+                            <div class="event-date">
+                                <strong>${day}</strong>
+                                <span>${month}</span>
+                            </div>
+                            <div class="event-details">
+                                <h4>${e.title}</h4>
+                                <p>📍 ${e.location} @ ${e.time}</p>
+                            </div>
+                        </div>
+                        `;
+                    }).join('');
+                } else {
+                    eventsContainer.innerHTML = "<p>No upcoming events.</p>";
+                }
+
+            } catch (err) {
+                console.error("Error loading dashboard data", err);
+            }
+
+            // Logout handling
+            document.getElementById("logoutBtn").addEventListener("click", (e) => {
+                e.preventDefault();
+                localStorage.clear();
+                window.location.href = "/pages/login.html";
+            });
+        });
+    </script>
+</body>
 </html>
