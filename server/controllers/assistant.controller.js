@@ -15,7 +15,6 @@ const askAssistant = (req, res) => {
         botResponse = "🎉 We have events happening all the time! Check the Events page on your sidebar for the latest schedule.";
     }
 
-    // Add a slight delay to simulate "typing" (feels more realistic)
     setTimeout(() => {
         res.json({ success: true, reply: botResponse });
     }, 500); 

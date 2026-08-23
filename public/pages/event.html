@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Campus Events — CampusX</title>
+  </head>
+  <body style="display: flex; margin: 0; font-family: sans-serif; background: #f7f7f5;">
+    
+    <!-- Sidebar -->
+    <aside style="width: 250px; background: #151619; color: white; height: 100vh; padding: 20px; position: sticky; top: 0;">
+      <h2>◆ CampusX</h2>
+      <ul style="list-style: none; padding: 0; margin-top: 30px; line-height: 2;">
+        <li><a href="/pages/dashboard.html" style="color: #aaa; text-decoration: none;">Dashboard</a></li>
+        <li><a href="/pages/lost-found.html" style="color: #aaa; text-decoration: none;">Lost & Found</a></li>
+        <li><a href="/pages/events.html" style="color: white; text-decoration: none;">Events</a></li>
+      </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main style="flex: 1; padding: 40px;">
+      <h1>Campus Events</h1>
+      
+      <!-- Host Event Form -->
+      <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 40px; max-width: 600px;">
+        <h3>Host an Event</h3>
+        <form id="eventForm" style="display: flex; flex-direction: column; gap: 15px;">
+          <input type="text" id="title" placeholder="Event Title (e.g., AI Hackathon)" required style="padding: 10px;" />
+          
+          <div style="display: flex; gap: 15px;">
+            <input type="date" id="date" required style="padding: 10px; flex: 1;" />
+            <input type="time" id="time" required style="padding: 10px; flex: 1;" />
+          </div>
+
+          <input type="text" id="location" placeholder="Location (e.g., Main Auditorium)" required style="padding: 10px;" />
+          <textarea id="description" placeholder="What is this event about?" style="padding: 10px; height: 80px;"></textarea>
+          
+          <button type="submit" style="background: #151619; color: white; padding: 12px; border: none; border-radius: 6px; cursor: pointer;">Post Event</button>
+        </form>
+      </div>
+
+      <!-- Events Feed -->
+      <h3>Upcoming Events</h3>
+      <div id="eventsFeed" style="display: grid; gap: 15px; max-width: 600px;">
+        <p>Loading events...</p>
+      </div>
+    </main>
+
+    <script src="/js/events.js"></script>
+  </body>
+</html>

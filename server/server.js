@@ -30,5 +30,5 @@ app.use("/api/queues", queuesRoutes);
 // 4. Start Server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`🚀 CampusX Server running flawlessly on port ${PORT}`);
+    console.log(`🚀 CampusX Server running on port ${PORT}`);
 });
